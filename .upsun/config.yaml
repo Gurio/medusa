@@ -9,6 +9,18 @@ applications:
       redis: "redis:redis"
       search: "opensearch:opensearch"
 
+    # Add mounts for writable directories
+    mounts:
+      '/.config':
+        source: storage
+        source_path: 'config'
+      '/.medusa':
+        source: storage
+        source_path: 'medusa'
+      '/static':
+        source: storage
+        source_path: 'static'
+
     web:
       commands:
         start: |
