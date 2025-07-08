@@ -12,19 +12,9 @@ applications:
     web:
       commands:
         start: |
-          # Set up environment variables from Upsun relationships
-          export DATABASE_URL=$(echo $PLATFORM_RELATIONSHIPS | base64 --decode | jq -r '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)"')
-          export REDIS_URL=$(echo $PLATFORM_RELATIONSHIPS | base64 --decode | jq -r '.redis[0] | "redis://\(.host):\(.port)"')
-          export OPENSEARCH_URL=$(echo $PLATFORM_RELATIONSHIPS | base64 --decode | jq -r '.search[0] | "https://\(.host):\(.port)"')
-
-          # Set required Medusa environment variables
-          export NODE_ENV=production
-          export JWT_SECRET=$JWT_SECRET
-          export COOKIE_SECRET=$COOKIE_SECRET
           export ADMIN_CORS=$(echo $PLATFORM_ROUTES | base64 --decode | jq -r 'keys[0]')
           export STORE_CORS=$(echo $PLATFORM_ROUTES | base64 --decode | jq -r 'keys[0]')
 
-          # Start Medusa
           npx medusa start
       upstream:
         socket_family: tcp
@@ -36,9 +26,6 @@ applications:
     variables:
       env:
         NODE_ENV: production
-        # You need to set these via: upsun variable:create --level environment --name JWT_SECRET --value "your-secret"
-        # JWT_SECRET: "will-be-set-via-cli"
-        # COOKIE_SECRET: "will-be-set-via-cli"
 
     build:
       flavor: none
@@ -55,12 +42,7 @@ applications:
 
       deploy: |
         set -eux
-        # Run database migrations
-        export DATABASE_URL=$(echo $PLATFORM_RELATIONSHIPS | base64 --decode | jq -r '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)"')
         npx medusa migrations run
-
-        # Create admin user (optional, for first deployment)
-        # npx medusa user:create --email admin@example.com --password supersecret
 
 services:
   postgresql:
